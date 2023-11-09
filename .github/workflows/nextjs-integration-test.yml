@@ -30,7 +30,7 @@ env:
   NEXT_TELEMETRY_DISABLED: 1
   TEST_CONCURRENCY: 6
   DATADOG_API_KEY: ${{ secrets.DATA_DOG_API_KEY }}
-  DATADOG_TRACE_NEXTJS_TEST: 'true'
+  NEXT_JUNIT_TEST_REPORT: 'true'
   DD_ENV: 'ci'
   # Turbopack specific customization for the test runner
   TURBOPACK: 1
@@ -185,7 +185,7 @@ jobs:
 
   upload_test_trace:
     needs: [test-dev, test-integration]
-    name: Upload test trace to datadog
+    name: Upload test metrics to datadog
     runs-on:
       - 'self-hosted'
       - 'linux'
@@ -196,13 +196,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Download test reports artifact
         id: download-test-reports
         uses: actions/download-artifact@v3
         with:
           name: Test trace reports
           path: test
-      - name: Upload test trace to datadog
+
+      - name: Upload to datadog
         run: |
           npm install -g @datadog/datadog-ci@2.18.1
           ls -al ./test/*.xml

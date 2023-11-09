@@ -303,7 +303,7 @@ jobs:
         id: check-did-build
         run: if [[ ! -z $(ls packages/next-swc/native) ]]; then echo "DID_BUILD=yup" >> $GITHUB_OUTPUT; fi
 
-      # Trying to upload metrics for the Turbopack to datadog's CI pipeline execution
+      # Trying to upload metrics for Turbopack to datadog's CI pipeline execution
       - name: 'Collect turbopack build metrics'
         id: check-turbopack-bytesize
         if: ${{ steps.check-did-build.outputs.DID_BUILD == 'yup' }}
@@ -492,17 +492,18 @@ jobs:
           NEXT_SKIP_NATIVE_POSTINSTALL: 1
 
   upload_turbopack_bytesize:
-    name: Upload Turbopack Bytesize trace to Datadog
+    name: Upload Turbopack Bytesize metric to Datadog
     runs-on: ubuntu-latest
     needs: [build-native]
     env:
       DATADOG_API_KEY: ${{ secrets.DATA_DOG_API_KEY }}
     steps:
-      - name: Collect bytesize traces
+      - name: Collect bytesize metrics
         uses: actions/download-artifact@v3
         with:
           name: turbopack-bytesize
           path: turbopack-bin-size
+
       - name: Upload to Datadog
         run: |
           ls -al turbopack-bin-size

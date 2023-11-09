@@ -7,6 +7,17 @@ async function format(text) {
   return prettier.format(text, { ...options, parser: 'json' })
 }
 
+const style = {
+  fg: {
+    red: '\u001b[38;2;255;0;0m',
+  },
+  bg: {
+    red: '\u001b[48;2;255;0;0m',
+  },
+  bold: '\u001b[1m',
+  reset: '\033[m',
+}
+
 const override = process.argv.includes('--override')
 
 const RESULT_URL =
@@ -153,13 +164,11 @@ async function updatePassingTests() {
 
       if (skippedPassingNames.length > 0) {
         console.log(
-          `${filepath} has ${
+          `${style.bold}${filepath}${style.reset} has ${
             skippedPassingNames.length
-          } passing tests that are marked as skipped: ${JSON.stringify(
-            skippedPassingNames,
-            0,
-            2
-          )}`
+          } passing tests that are marked as skipped:${
+            style.reset
+          }\n${skippedPassingNames.map((name) => `  - ${name}`).join('\n')}\n`
         )
       }
     }
@@ -190,9 +199,14 @@ async function updatePassingTests() {
         oldData.passed.filter((name) => newData.failed.includes(name))
       )
       if (shouldPass.size > 0) {
-        const list = JSON.stringify([...shouldPass], 0, 2)
         console.log(
-          `${file} has ${shouldPass.size} test(s) that should pass but failed: ${list}`
+          `${style.bold}${style.fg.red}${file}${style.reset}${
+            style.fg.red
+          } has ${shouldPass.size} test(s) that should pass but failed:${
+            style.reset
+          }\n${Array.from(shouldPass)
+            .map((name) => `  - ${name}`)
+            .join('\n')}\n`
         )
       }
       // Merge the old passing tests with the new ones
@@ -203,7 +217,9 @@ async function updatePassingTests() {
         .sort()
 
       if (!oldData.runtimeError && newData.runtimeError) {
-        console.log(`${file} has a runtime error that is shouldn't have`)
+        console.log(
+          `${style.bold}${style.fg.red}${file}${style.reset}${style.fg.red} has a runtime error that is shouldn't have\n`
+        )
         newData.runtimeError = false
       }
     }
